@@ -1,0 +1,1 @@
+ALTER TABLE `transactions` ADD `starting_balance` integer DEFAULT false NOT NULL;

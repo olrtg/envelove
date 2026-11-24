@@ -1,0 +1,13 @@
+services:
+  web:
+    command: >-
+      BETTER_AUTH_URL="$PUBLIC_URL" pnpm exec dotenv -e .env.local --
+      vite dev --host 0.0.0.0 --port "$PORT" --strictPort
+    env:
+      DATABASE_URL: ./orb.db
+      SEED_EMAIL: orb@example.test
+      AUTH_ALLOWED_EMAILS: orb@example.test
+    health: /login
+    portal:
+      title: Budget app
+      description: Development auto-sign-in as orb@example.test with sample budget data. No email credentials needed.

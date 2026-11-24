@@ -1,0 +1,3 @@
+# Deleted categories are removed, not tombstoned
+
+Deleting a Category or Category Group removes its records after every reference has been reassigned, unlike YNAB, which keeps deleted categories with a `deleted` flag. Tombstones mainly serve delta sync, which this app does not have; Hidden Category already covers retiring a Category while keeping its history. A future undo restores deleted records from a snapshot under their original IDs, which the app generates, and moves reassigned Transactions back. The deletion's inverse must be recorded either way, because a tombstone alone cannot reverse a reassignment.

@@ -1,0 +1,15 @@
+**
+!package.json
+!pnpm-lock.yaml
+!pnpm-workspace.yaml
+!tsconfig.json
+!tsr.config.json
+!vite.config.ts
+!src/
+!src/**
+!public/
+!public/**
+!drizzle/
+!drizzle/**
+!scripts/
+!scripts/migrate.mjs

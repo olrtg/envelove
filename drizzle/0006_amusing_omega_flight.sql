@@ -1,0 +1,1 @@
+ALTER TABLE `plans` ADD `default_transaction_cleared` integer DEFAULT false NOT NULL;

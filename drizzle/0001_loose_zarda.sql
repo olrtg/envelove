@@ -1,0 +1,1 @@
+ALTER TABLE `plans` ADD `country_code` text DEFAULT 'US' NOT NULL;

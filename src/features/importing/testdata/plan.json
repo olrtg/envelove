@@ -1,0 +1,185 @@
+{
+  "data": {
+    "plan": {
+      "name": "Household",
+      "currency_format": { "iso_code": "KWD" },
+      "first_month": "2026-10-01",
+      "accounts": [
+        {
+          "id": "cash",
+          "name": "Checking",
+          "closed": false,
+          "type": "checking",
+          "balance": 146544,
+          "cleared_balance": 163333,
+          "deleted": false
+        },
+        {
+          "id": "card",
+          "name": "Visa",
+          "closed": false,
+          "type": "creditCard",
+          "balance": -8333,
+          "cleared_balance": -20000,
+          "deleted": false
+        }
+      ],
+      "payees": [
+        { "id": "opening", "name": "Starting Balance", "deleted": false },
+        { "id": "shop", "name": "Market", "deleted": false },
+        { "id": "unused", "name": "Bookshop", "deleted": false },
+        {
+          "id": "xfer",
+          "name": "Transfer : Visa",
+          "transfer_account_id": "card",
+          "deleted": false
+        }
+      ],
+      "category_groups": [
+        {
+          "id": "in",
+          "name": "Internal Master Category",
+          "internal": true,
+          "hidden": false,
+          "deleted": false
+        },
+        {
+          "id": "home",
+          "name": "Essentials",
+          "hidden": false,
+          "deleted": false
+        },
+        {
+          "id": "payments",
+          "name": "Credit Card Payments",
+          "hidden": false,
+          "deleted": false
+        }
+      ],
+      "categories": [
+        {
+          "id": "rta",
+          "category_group_id": "in",
+          "name": "Inflow: Ready to Assign",
+          "hidden": false,
+          "deleted": false
+        },
+        {
+          "id": "food",
+          "category_group_id": "home",
+          "name": "Groceries",
+          "hidden": false,
+          "deleted": false,
+          "goal_type": "NEED",
+          "goal_target": 40123,
+          "goal_creation_month": "2026-10-01",
+          "goal_cadence": 1,
+          "goal_cadence_frequency": 1,
+          "goal_needs_whole_amount": false
+        },
+        {
+          "id": "care",
+          "category_group_id": "home",
+          "name": "Household supplies",
+          "hidden": true,
+          "deleted": false
+        },
+        {
+          "id": "visa",
+          "category_group_id": "payments",
+          "name": "Visa",
+          "hidden": false,
+          "deleted": false
+        }
+      ],
+      "months": [
+        {
+          "month": "2026-10-01",
+          "deleted": false,
+          "categories": [
+            { "id": "food", "budgeted": 40123, "deleted": false },
+            { "id": "visa", "budgeted": 11667, "deleted": false }
+          ]
+        },
+        {
+          "month": "2026-11-01",
+          "deleted": false,
+          "categories": [{ "id": "food", "budgeted": -1250, "deleted": false }]
+        }
+      ],
+      "transactions": [
+        {
+          "id": "open",
+          "account_id": "cash",
+          "payee_id": "opening",
+          "category_id": "rta",
+          "date": "2026-10-01",
+          "amount": 175000,
+          "cleared": "reconciled",
+          "deleted": false
+        },
+        {
+          "id": "debt",
+          "account_id": "card",
+          "payee_id": "opening",
+          "category_id": "rta",
+          "date": "2026-10-01",
+          "amount": -20000,
+          "cleared": "cleared",
+          "deleted": false
+        },
+        {
+          "id": "out",
+          "account_id": "cash",
+          "category_id": "visa",
+          "transfer_account_id": "card",
+          "transfer_transaction_id": "in",
+          "date": "2026-11-01",
+          "amount": -11667,
+          "cleared": "cleared",
+          "deleted": false
+        },
+        {
+          "id": "in",
+          "account_id": "card",
+          "transfer_account_id": "cash",
+          "transfer_transaction_id": "out",
+          "date": "2026-11-01",
+          "amount": 11667,
+          "cleared": "uncleared",
+          "deleted": false
+        },
+        {
+          "id": "split",
+          "account_id": "cash",
+          "payee_id": "shop",
+          "memo": "Weekly shop",
+          "date": "2026-11-05",
+          "amount": -16789,
+          "cleared": "uncleared",
+          "deleted": false
+        }
+      ],
+      "subtransactions": [
+        {
+          "id": "part1",
+          "transaction_id": "split",
+          "memo": "Bakery",
+          "category_id": "food",
+          "amount": -10001,
+          "deleted": false
+        },
+        {
+          "id": "part2",
+          "transaction_id": "split",
+          "memo": "Soap",
+          "category_id": "care",
+          "amount": -6788,
+          "deleted": false
+        }
+      ],
+      "scheduled_transactions": [{ "deleted": false }]
+    },
+    "server_knowledge": 10
+  }
+}

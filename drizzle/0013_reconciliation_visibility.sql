@@ -1,0 +1,1 @@
+ALTER TABLE `plans` ADD `hide_after_reconciliation` integer DEFAULT true NOT NULL;

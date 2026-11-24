@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+cd "$(dirname "${BASH_SOURCE[0]}")/.."
+
+echo "Using Node $(node --version) and pnpm $(pnpm --version) from the orb toolchain"
+
+echo "Installing locked dependencies"
+time pnpm install --frozen-lockfile
+
+echo "Preparing local development configuration"
+if [[ ! -f .env.local ]]; then
+  node --input-type=module <<'NODE'
+import { randomBytes } from 'node:crypto'
+import { writeFileSync } from 'node:fs'
+
+writeFileSync('.env.local', [
+  'DATABASE_URL="./orb.db"',
+  'BETTER_AUTH_URL="http://localhost:3000"',
+  `BETTER_AUTH_SECRET="${randomBytes(32).toString('hex')}"`,
+  'SEED_EMAIL="orb@example.test"',
+  '',
+].join('\n'), { mode: 0o600, flag: 'wx' })
+NODE
+fi
+
+# Always target the disposable orb database, never an inherited DATABASE_URL.
+fresh_database=false
+if [[ ! -f orb.db ]]; then
+  fresh_database=true
+fi
+
+echo "Applying SQLite migrations"
+time DATABASE_URL=./orb.db pnpm db:migrate
+
+# The seed command replaces its plan; only run it for a new database.
+if [[ "$fresh_database" == true ]]; then
+  echo "Seeding the new orb database"
+  time DATABASE_URL=./orb.db SEED_EMAIL=orb@example.test pnpm db:seed
+fi
+
+echo "Orb setup ready; start the preview with: amp orb services ensure"

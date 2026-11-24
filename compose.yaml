@@ -1,0 +1,30 @@
+services:
+  app:
+    image: envelove:local
+    build:
+      context: .
+      # Keep Railway on Railpack; only Compose should select this image.
+      dockerfile: docker/Dockerfile
+    restart: unless-stopped
+    ports:
+      - '127.0.0.1:3000:3000'
+    volumes:
+      - ./data:/data
+    environment:
+      BETTER_AUTH_URL: ${BETTER_AUTH_URL:?Set the browser origin in .env}
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?Generate a secret in .env}
+      AUTH_ALLOWED_EMAILS: ${AUTH_ALLOWED_EMAILS:?List allowed addresses in .env}
+      RESEND_API_KEY: ${RESEND_API_KEY:?Set your Resend key in .env}
+      AUTH_EMAIL_FROM: ${AUTH_EMAIL_FROM:?Set your verified sender in .env}
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://127.0.0.1:3000/login').then(r => process.exit(r.status === 200 ? 0 : 1)).catch(() => process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 5s
+      start_period: 30s
+      retries: 3

@@ -1,0 +1,118 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1785415595628,
+      "tag": "0000_curly_sunspot",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1785416795385,
+      "tag": "0001_loose_zarda",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1785425737579,
+      "tag": "0002_rich_roulette",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1785440101730,
+      "tag": "0003_slimy_the_phantom",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1785568502661,
+      "tag": "0004_even_krista_starr",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1785847238515,
+      "tag": "0005_daffy_thor",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1785989074400,
+      "tag": "0006_amusing_omega_flight",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1786656255757,
+      "tag": "0007_tidy_dragon_man",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1790208483320,
+      "tag": "0008_breezy_sabretooth",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "6",
+      "when": 1792075708977,
+      "tag": "0009_sleepy_white_queen",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "6",
+      "when": 1792076765811,
+      "tag": "0010_awesome_scarecrow",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "6",
+      "when": 1794567600000,
+      "tag": "0011_action_receipts",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "6",
+      "when": 1795188711537,
+      "tag": "0012_reconciliation",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "6",
+      "when": 1795191549653,
+      "tag": "0013_reconciliation_visibility",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "6",
+      "when": 1795214006407,
+      "tag": "0014_category_targets",
+      "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "6",
+      "when": 1795231222919,
+      "tag": "0015_starting_balance",
+      "breakpoints": true
+    }
+  ]
+}
