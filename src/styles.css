@@ -142,6 +142,22 @@
   @apply bg-popover/70 backdrop-blur-2xl backdrop-saturate-150;
 }
 
+/* Overlap the parent only when neither side has room for the submenu. */
+[data-slot='dropdown-menu-sub-content'] {
+  --overlap: max(
+    0px,
+    100% - var(--radix-dropdown-menu-content-available-width)
+  );
+  max-width: calc(100vw - 1rem);
+
+  &[data-side='right'] {
+    translate: calc(-1 * var(--overlap));
+  }
+  &[data-side='left'] {
+    translate: var(--overlap);
+  }
+}
+
 @media (width < 48rem) {
   [data-plan-column='Available'] :is(.plan-activity, .plan-assigned),
   [data-plan-column='Assigned'] .plan-amount:not(.plan-assigned),
