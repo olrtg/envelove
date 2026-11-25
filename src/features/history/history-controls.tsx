@@ -14,7 +14,7 @@ import {
   historyEpoch,
   historySnapshot,
   historySubscribe,
-  historyTabId,
+  historyRequestIds,
   pendingRetry,
   requestWithRetry,
   refreshHistoryViews,
@@ -50,14 +50,13 @@ export function HistoryControls({ planId }: { planId?: string }) {
     const source = stackFor(planId)[direction]
     const entry = source.at(-1)
     if (!entry) return
-    const data = {
-      requestId: crypto.randomUUID(),
-      tabId: historyTabId(),
-      receiptId: entry.id,
-      generation: entry.generation,
-      direction,
-    }
-    const run = async () => {
+    const run = async (ids: ReturnType<typeof historyRequestIds>) => {
+      const data = {
+        ...ids,
+        receiptId: entry.id,
+        generation: entry.generation,
+        direction,
+      }
       const receipt = await reverseSavedAction({ data })
       if (started !== historyEpoch()) return
       source.pop()
@@ -97,7 +96,8 @@ export function HistoryControls({ planId }: { planId?: string }) {
       )
     }
     try {
-      await exclusive(() => requestWithRetry(run))
+      const ids = historyRequestIds()
+      await exclusive(() => requestWithRetry(() => run(ids)))
     } catch (error) {
       toast.error(
         `Couldn't ${direction}: ${error instanceof Error ? error.message : 'Request failed'}`,

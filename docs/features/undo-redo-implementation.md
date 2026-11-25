@@ -41,7 +41,7 @@ and preserve redo.
 
 The `action_receipts` table (migration 0011) holds server-owned operational
 receipts and serialized retry results, not the user's browser stacks. Clients
-submit UUIDs, a direction and an expected receipt generation. They cannot submit
+submit Nano IDs, a direction and an expected receipt generation. They cannot submit
 record/field patches. Receipts bind owner, tab token and Plan; every reversal and
 retry checks current Plan ownership. Input reuse with a different operation is
 rejected. Browser history cannot be listed or reconstructed from the server.
@@ -76,13 +76,13 @@ is an explicit way to clear the tab's history.
 
 ## Client behavior
 
-Module memory stores separate stacks by Plan; each browser tab has its own UUID.
+Module memory stores separate stacks by Plan; each browser tab has its own Nano ID.
 Navigation preserves the stacks. Successful new saved actions clear only that
 Plan's redo branch. A global per-tab lock prevents overlapping saved requests and
 reversals. A logout/unmount epoch prevents late responses from repopulating old
 history. Nothing is placed in localStorage, sessionStorage or browser persistence.
 
-Transport failures retain the exact request closure and operation UUID. Controls
+Transport failures retain the exact request closure and operation ID. Controls
 show **Retry save** and block subsequent saves/reversals. A retry retrieves the
 committed result or performs the previously uncommitted request; generation checks
 and persisted results prevent double reversal. Domain conflicts remain failures.

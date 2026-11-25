@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
+import { createId } from '#/lib/id'
 import {
   clearHistory,
   exclusive,
@@ -10,10 +11,23 @@ import {
 } from './history-state'
 import type { HistoryReceipt } from './history.schemas'
 
+test('LAN HTTP saves send distinct Nano IDs and reuse the tab ID', async (t) => {
+  clearHistory()
+  const getRandomValues = crypto.getRandomValues.bind(crypto)
+  t.mock.getter(globalThis, 'crypto', () => ({ getRandomValues }) as Crypto)
+  const save = savedAction(async ({ data }) => ({ value: data, receipt: null }))
+  const first = await save({ data: {} })
+  const second = await save({ data: {} })
+  const ids = [first.tabId, first.requestId, second.requestId]
+  for (const id of ids) assert.match(id, /^[A-Za-z0-9_-]{21}$/)
+  assert.equal(new Set(ids).size, 3)
+  assert.equal(second.tabId, first.tabId)
+})
+
 test('memory stacks isolate Plans, preserve redo on failure/no-op, and serialize saves', async () => {
   clearHistory()
   const receipt: HistoryReceipt = {
-    id: crypto.randomUUID(),
+    id: createId(),
     planId: 'one',
     description: 'created category Food',
     generation: 0,
@@ -51,7 +65,7 @@ test('ambiguous transport failure blocks new saves until retry resolves', async 
   clearHistory()
   let calls = 0
   const receipt: HistoryReceipt = {
-    id: crypto.randomUUID(),
+    id: createId(),
     planId: 'one',
     description: 'created category Food',
     generation: 0,
@@ -78,7 +92,7 @@ test('logout ignores a late successful response instead of rebuilding old histor
   clearHistory()
   let resolve!: (response: { value: number; receipt: HistoryReceipt }) => void
   const receipt: HistoryReceipt = {
-    id: crypto.randomUUID(),
+    id: createId(),
     planId: 'one',
     description: 'created category Food',
     generation: 0,

@@ -1,3 +1,4 @@
+import { createId } from '#/lib/id'
 import type { HistoryReceipt } from './history.schemas'
 
 type Stack = { undo: HistoryReceipt[]; redo: HistoryReceipt[] }
@@ -9,7 +10,20 @@ let retry: (() => Promise<unknown>) | undefined
 let tabId: string | undefined
 let epoch = 0
 export const historyEpoch = () => epoch
-export const historyTabId = () => (tabId ??= crypto.randomUUID())
+
+export class SavePreparationError extends Error {}
+
+export function historyRequestIds() {
+  try {
+    return { requestId: createId(), tabId: (tabId ??= createId()) }
+  } catch (cause) {
+    throw new SavePreparationError(
+      'Nothing was sent. Open Envelove over HTTPS or use a browser that supports secure random IDs.',
+      { cause },
+    )
+  }
+}
+
 export const historySnapshot = () => revision
 export const historySubscribe = (listener: () => void) => {
   listeners.add(listener)
@@ -106,8 +120,7 @@ export function savedAction<TData, TResult>(
     const started = epoch
     const data = {
       value: options.data,
-      requestId: crypto.randomUUID(),
-      tabId: historyTabId(),
+      ...historyRequestIds(),
     }
     const run = async () => {
       const response = await request({ data })

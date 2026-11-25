@@ -1,6 +1,7 @@
-import { createHash, randomUUID } from 'node:crypto'
+import { createHash } from 'node:crypto'
 import { serialize, deserialize } from 'node:v8'
 import { db } from '#/db'
+import { createId } from '#/lib/id'
 import { getNumberFormat } from '#/lib/intl-formats'
 import { amountMatchesCurrency } from '#/features/transactions/transaction-money'
 import type { CurrencyCode } from '#/lib/country-profiles'
@@ -443,7 +444,7 @@ export function captureAction<T>(
             changes.find((c) => c.table === 'transactions')?.after?.account_id)
       const receipt: HistoryReceipt | null = changes.length
         ? {
-            id: randomUUID(),
+            id: createId(),
             planId,
             description,
             ...(action === 'combinePayees' && { payees: true }),

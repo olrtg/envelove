@@ -91,6 +91,10 @@ import type { TransferSide } from '#/lib/transfer'
 import { cn } from '#/lib/utils'
 import { planAccountsQueryKey } from '#/features/accounts/accounts.queries'
 import { readyToAssignQueryOptions } from '#/features/budget/budget.queries'
+import {
+  InterruptedSaveError,
+  SavePreparationError,
+} from '#/features/history/history-state'
 import { getPayeeNameKey } from '#/features/payees/payee.schemas'
 
 import {
@@ -728,9 +732,12 @@ export function TransactionRegister({
         cause.message.startsWith('The Transaction changed.')
       setDraftError({
         field: null,
-        message: stale
-          ? cause.message
-          : 'Could not save this Transaction. Please try again.',
+        message:
+          stale ||
+          cause instanceof SavePreparationError ||
+          cause instanceof InterruptedSaveError
+            ? cause.message
+            : 'Could not save this Transaction. Please try again.',
       })
       if (stale)
         await refreshRegister().catch(() =>

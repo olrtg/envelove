@@ -6,6 +6,7 @@ import test, { after } from 'node:test'
 
 import Database from 'better-sqlite3'
 import { eq } from 'drizzle-orm'
+import { createId } from '#/lib/id'
 
 const testDirectory = mkdtempSync(join(tmpdir(), 'envelove-payees-'))
 const databasePath = join(testDirectory, 'test.sqlite')
@@ -210,11 +211,11 @@ test('combines closed-account history without changing category recency, and rev
       .all()
   const before = rows()
   for (const name of ['New Shop', 'tWo']) {
-    const tabId = crypto.randomUUID()
+    const tabId = createId()
     const data = { planId, ids: ['one', 'two'], name }
     const { value, receipt } = captureAction(
       ownerId,
-      { tabId, requestId: crypto.randomUUID() },
+      { tabId, requestId: createId() },
       'combinePayees',
       data,
       () => combineOwnedPayees({ ...data, ownerId }),
@@ -236,7 +237,7 @@ test('combines closed-account history without changing category recency, and rev
     for (const [generation, direction] of ['undo', 'redo', 'undo'].entries()) {
       reverseAction(ownerId, {
         tabId,
-        requestId: crypto.randomUUID(),
+        requestId: createId(),
         receiptId: receipt.id,
         generation,
         direction: direction as 'undo' | 'redo',

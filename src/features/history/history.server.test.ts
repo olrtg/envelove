@@ -1,11 +1,11 @@
 import assert from 'node:assert/strict'
-import { randomUUID } from 'node:crypto'
 import { mkdtempSync, readdirSync, readFileSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import test, { after } from 'node:test'
 import Database from 'better-sqlite3'
 import { parsePlanMonth } from '#/features/plans/plan-month'
+import { createId } from '#/lib/id'
 
 const directory = mkdtempSync(join(tmpdir(), 'envelove-history-'))
 const path = join(directory, 'fixture.sqlite')
@@ -34,7 +34,7 @@ const { insertOwnedTransaction } =
   await import('#/features/transactions/transactions.server')
 const { user } = await import('#/db/schema')
 const owner = 'history-owner',
-  tabId = randomUUID()
+  tabId = createId()
 db.insert(user)
   .values({
     id: owner,
@@ -74,18 +74,12 @@ function fixture() {
   return { plan, group, category, account }
 }
 function action<T>(name: string, data: Record<string, unknown>, run: () => T) {
-  return captureAction(
-    owner,
-    { tabId, requestId: randomUUID() },
-    name,
-    data,
-    run,
-  )
+  return captureAction(owner, { tabId, requestId: createId() }, name, data, run)
 }
 function reverse(
   entry: NonNullable<ReturnType<typeof action>['receipt']>,
   direction: 'undo' | 'redo' = 'undo',
-  requestId = randomUUID(),
+  requestId = createId(),
 ) {
   return reverseAction(owner, {
     tabId,
@@ -271,7 +265,7 @@ test('Account creation protects new dependent Transactions and credit categories
 })
 test('durable idempotency rejects forged, stale, cross-tab and foreign-owner requests', () => {
   const { plan, account } = fixture()
-  const request = { tabId, requestId: randomUUID() },
+  const request = { tabId, requestId: createId() },
     data = { id: account.id }
   let calls = 0
   const run = () => {
@@ -293,7 +287,7 @@ test('durable idempotency rejects forged, stale, cross-tab and foreign-owner req
     () => captureAction(owner, request, 'updateAccount', { id: 'forged' }, run),
     /Invalid retry/,
   )
-  const requestId = randomUUID(),
+  const requestId = createId(),
     input = {
       tabId,
       requestId,
@@ -305,15 +299,15 @@ test('durable idempotency rejects forged, stale, cross-tab and foreign-owner req
   assert.deepEqual(reverseAction(owner, input), undone)
   assert.throws(() => reverse(saved.receipt!), /changed in another session/)
   assert.throws(
-    () => reverseAction('foreign', { ...input, requestId: randomUUID() }),
+    () => reverseAction('foreign', { ...input, requestId: createId() }),
     /unavailable/,
   )
   assert.throws(
     () =>
       reverseAction(owner, {
         ...input,
-        tabId: randomUUID(),
-        requestId: randomUUID(),
+        tabId: createId(),
+        requestId: createId(),
       }),
     /unavailable/,
   )
@@ -321,8 +315,8 @@ test('durable idempotency rejects forged, stale, cross-tab and foreign-owner req
     () =>
       reverseAction(owner, {
         ...input,
-        receiptId: randomUUID(),
-        requestId: randomUUID(),
+        receiptId: createId(),
+        requestId: createId(),
       }),
     /unavailable/,
   )
@@ -902,7 +896,7 @@ test('reconciliation rechecks eligibility and ledger, rolls back failures, and r
   assert.throws(run, /fixture failure/)
   sql.exec('DROP TRIGGER fail_completion')
   assert.deepEqual(await register(), refreshed)
-  const request = { requestId: randomUUID(), tabId }
+  const request = { requestId: createId(), tabId }
   const save = () =>
     captureAction(owner, request, 'reconcileAccount', input, run)
   const result = save()
