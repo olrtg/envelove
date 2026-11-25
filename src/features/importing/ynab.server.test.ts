@@ -140,13 +140,12 @@ test('skips internal groups and preserves current and legacy hidden categories u
             deleted: false,
           },
           {
-            id: 'system',
-            name: 'System',
+            id: 'empty',
+            name: 'Future bills',
             internal: true,
             hidden: false,
             deleted: false,
           },
-          { id: 'empty', name: 'Future bills', hidden: false, deleted: false },
         ],
         categories: plan.categories.map((c) =>
           c.id === 'food'

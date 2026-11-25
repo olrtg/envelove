@@ -57,11 +57,7 @@ const snapshot = z.object({
     )
     .max(512),
   payees: z.array(named.extend({ transfer_account_id: optionalText })),
-  category_groups: z
-    .array(
-      named.extend({ hidden: z.boolean(), internal: z.boolean().optional() }),
-    )
-    .max(4096),
+  category_groups: z.array(named.extend({ hidden: z.boolean() })).max(4096),
   categories: z.array(category).max(4096),
   months: z.array(
     z.object({
@@ -142,10 +138,11 @@ function readTarget(c: z.infer<typeof category>) {
   return result.success ? result.data : 'Invalid target date or schedule.'
 }
 
-function groupKind(g: { name: string; internal?: boolean }) {
+// Full snapshots can mark even user-created groups as internal.
+function groupKind(g: { name: string }) {
   if (g.name === 'Hidden Categories') return 'hidden'
   if (g.name === 'Credit Card Payments') return 'payments'
-  if (g.internal || g.name === 'Internal Master Category') return 'internal'
+  if (g.name === 'Internal Master Category') return 'internal'
   return 'ordinary'
 }
 

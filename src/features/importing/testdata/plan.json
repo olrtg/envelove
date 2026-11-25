@@ -46,6 +46,7 @@
         {
           "id": "home",
           "name": "Essentials",
+          "internal": true,
           "hidden": false,
           "deleted": false
         },
