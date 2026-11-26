@@ -1,4 +1,4 @@
-import { Fragment, useSyncExternalStore } from 'react'
+import { Fragment, useState, useSyncExternalStore } from 'react'
 import {
   historySubscribe,
   historyViewSnapshot,
@@ -11,6 +11,9 @@ import {
   SidebarTrigger,
 } from '#/components/ui/sidebar'
 import { TooltipProvider } from '#/components/ui/tooltip'
+
+import { OpenStartPlanDialog } from '#/features/plans/start-plan-dialog'
+import type { StartPlanDialog } from '#/features/plans/start-plan-dialog'
 
 export function AppShell({
   activeAccountId,
@@ -31,6 +34,7 @@ export function AppShell({
   children: React.ReactNode
   user: { email: string }
 }) {
+  const [startDialog, setStartDialog] = useState<StartPlanDialog>(null)
   const historyView = useSyncExternalStore(
     historySubscribe,
     historyViewSnapshot,
@@ -41,6 +45,8 @@ export function AppShell({
       <SidebarProvider>
         <AppSidebar
           key={historyView}
+          startDialog={startDialog}
+          onStartDialogChange={setStartDialog}
           activeAccountId={activeAccountId}
           activeAllAccounts={activeAllAccounts}
           activePayees={activePayees}
@@ -54,7 +60,9 @@ export function AppShell({
             <SidebarTrigger className="max-md:size-10 md:absolute md:left-4 md:top-4" />
             <HistoryControls planId={activePlanId} />
           </div>
-          <Fragment key={historyView}>{children}</Fragment>
+          <OpenStartPlanDialog value={setStartDialog}>
+            <Fragment key={historyView}>{children}</Fragment>
+          </OpenStartPlanDialog>
         </SidebarInset>
       </SidebarProvider>
     </TooltipProvider>

@@ -25,6 +25,22 @@ import {
 import { useServerFn } from '@tanstack/react-start'
 
 import { Button } from '#/components/ui/button'
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '#/components/ui/alert-dialog'
+import {
+  exclusive,
+  forgetPlanHistory,
+  pendingRetry,
+} from '#/features/history/history-state'
+import type { StartPlanDialog } from '#/features/plans/start-plan-dialog'
 import { Checkbox } from '#/components/ui/checkbox'
 import {
   Dialog,
@@ -71,6 +87,7 @@ import { useAmountsHidden, setAmountsHidden } from '#/hooks/use-amount-privacy'
 import { AccountsSidebar } from '#/features/accounts/accounts-sidebar'
 import {
   createPlan,
+  deletePlan,
   listPlans,
   updatePlanSettings,
 } from '#/features/plans/plans.functions'
@@ -92,6 +109,12 @@ type AccountUser = {
   email: string
 }
 
+function sidebarPlan(
+  plan: Awaited<ReturnType<typeof listPlans>>[number],
+): Plan {
+  return { ...plan, country: plan.countryCode, currency: plan.currencyCode }
+}
+
 type PlanDraft = Pick<Plan, 'name' | 'country'> & {
   currency: CurrencyCode | ''
 }
@@ -110,6 +133,8 @@ export function AppSidebar({
   activeReflect = false,
   activeChat = false,
   activePlanId,
+  startDialog,
+  onStartDialogChange,
   user,
 }: {
   activeAccountId?: string
@@ -118,6 +143,8 @@ export function AppSidebar({
   activeReflect?: boolean
   activeChat?: boolean
   activePlanId?: string
+  startDialog: StartPlanDialog
+  onStartDialogChange: (dialog: StartPlanDialog) => void
   user: AccountUser
 }) {
   const navigate = useNavigate()
@@ -133,10 +160,9 @@ export function AppSidebar({
   )
   const listPlansFn = useServerFn(listPlans)
   const createPlanFn = useServerFn(createPlan)
+  const deletePlanFn = useServerFn(deletePlan)
   const updatePlanSettingsFn = useServerFn(updatePlanSettings)
   const [plans, setPlans] = useState<Array<Plan>>([])
-  const [isCreatePlanOpen, setIsCreatePlanOpen] = useState(false)
-  const [isImportOpen, setIsImportOpen] = useState(false)
   const [createPlanDraft, setCreatePlanDraft] =
     useState<PlanDraft>(INITIAL_PLAN_DRAFT)
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
@@ -162,15 +188,7 @@ export function AppSidebar({
       try {
         const persistedPlans = await listPlansFn()
         if (!ignore) {
-          const nextPlans = persistedPlans.map((plan) => ({
-            id: plan.id,
-            name: plan.name,
-            country: plan.countryCode,
-            currency: plan.currencyCode,
-            defaultTransactionCleared: plan.defaultTransactionCleared,
-            hideAfterReconciliation: plan.hideAfterReconciliation,
-          }))
-          setPlans(nextPlans)
+          setPlans(persistedPlans.map(sidebarPlan))
         }
       } finally {
         if (!ignore) setIsLoadingPlans(false)
@@ -203,11 +221,10 @@ export function AppSidebar({
     setIsSettingsOpen(true)
   }
 
-  function openCreatePlan() {
-    setOpenMobile(false)
+  function closeCreatePlan() {
     setCreatePlanDraft(INITIAL_PLAN_DRAFT)
     setCreatePlanError(null)
-    setIsCreatePlanOpen(true)
+    onStartDialogChange(null)
   }
 
   async function addPlan() {
@@ -234,7 +251,7 @@ export function AppSidebar({
         hideAfterReconciliation: savedPlan.hideAfterReconciliation,
       }
       setPlans((currentPlans) => [...currentPlans, newPlan])
-      setIsCreatePlanOpen(false)
+      closeCreatePlan()
       await navigate({
         to: '/plans/$planId',
         params: { planId: newPlan.id },
@@ -295,6 +312,30 @@ export function AppSidebar({
     }
   }
 
+  async function removePlan(id: string) {
+    if (pendingRetry())
+      throw new Error('Retry the interrupted save before deleting this plan.')
+    await exclusive(async () => {
+      const remaining = await deletePlanFn({ data: { id } })
+      forgetPlanHistory(id)
+      setPlans(remaining.map(sidebarPlan))
+      setIsSettingsOpen(false)
+      setSettingsDraft(null)
+      const next = remaining.at(0)
+      if (next)
+        await navigate({
+          to: '/plans/$planId',
+          params: { planId: next.id },
+          replace: true,
+        })
+      else await navigate({ to: '/', replace: true })
+      router.clearCache({
+        filter: (match) =>
+          'planId' in match.params && match.params.planId === id,
+      })
+    })
+  }
+
   return (
     <>
       <Sidebar>
@@ -304,10 +345,13 @@ export function AppSidebar({
             isLoading={isLoadingPlans}
             plans={plans}
             user={user}
-            onCreatePlan={openCreatePlan}
+            onCreatePlan={() => {
+              setOpenMobile(false)
+              onStartDialogChange('new')
+            }}
             onImport={() => {
               setOpenMobile(false)
-              setIsImportOpen(true)
+              onStartDialogChange('import')
             }}
             onOpenSettings={openSettings}
             onSelectPlan={(planId) => {
@@ -443,23 +487,25 @@ export function AppSidebar({
         </SidebarFooter>
       </Sidebar>
 
-      {isImportOpen && (
+      {startDialog === 'import' && (
         <Suspense>
-          <YnabDialog onClose={() => setIsImportOpen(false)} />
+          <YnabDialog onClose={() => onStartDialogChange(null)} />
         </Suspense>
       )}
       <CreatePlanDialog
         draft={createPlanDraft}
         error={createPlanError}
         isCreating={isCreatingPlan}
-        open={isCreatePlanOpen}
+        open={startDialog === 'new'}
         onCreate={addPlan}
         onDraftChange={setCreatePlanDraft}
-        onOpenChange={setIsCreatePlanOpen}
+        onOpenChange={closeCreatePlan}
       />
 
-      {settingsDraft && (
+      {settingsDraft && activePlan?.id === settingsDraft.id && (
         <PlanSettingsDialog
+          planName={activePlan.name}
+          onDelete={() => removePlan(settingsDraft.id)}
           draft={settingsDraft}
           error={settingsError}
           isSaving={isSavingSettings}
@@ -719,6 +765,8 @@ function CreatePlanDialog({
 }
 
 function PlanSettingsDialog({
+  planName,
+  onDelete,
   draft,
   error,
   isSaving,
@@ -727,6 +775,8 @@ function PlanSettingsDialog({
   onOpenChange,
   onSave,
 }: {
+  planName: string
+  onDelete: () => Promise<void>
   draft: SettingsDraft
   error: string | null
   isSaving: boolean
@@ -816,6 +866,11 @@ function PlanSettingsDialog({
         </FieldGroup>
 
         <DialogFooter>
+          <DeletePlanConfirmation
+            planName={planName}
+            disabled={isSaving}
+            onDelete={onDelete}
+          />
           <Button onClick={() => onOpenChange(false)} variant="outline">
             Cancel
           </Button>
@@ -829,5 +884,76 @@ function PlanSettingsDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  )
+}
+
+function DeletePlanConfirmation({
+  planName,
+  disabled,
+  onDelete,
+}: {
+  planName: string
+  disabled: boolean
+  onDelete: () => Promise<void>
+}) {
+  const [open, setOpen] = useState(false)
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState('')
+  async function confirm() {
+    setBusy(true)
+    setError('')
+    try {
+      await onDelete()
+    } catch (cause) {
+      setError(
+        cause instanceof Error
+          ? cause.message
+          : 'Could not delete this plan. Please try again.',
+      )
+      setBusy(false)
+    }
+  }
+  return (
+    <AlertDialog
+      open={open}
+      onOpenChange={(next) => {
+        if (!busy) {
+          setError('')
+          setOpen(next)
+        }
+      }}
+    >
+      <AlertDialogTrigger asChild>
+        <Button
+          className="sm:mr-auto"
+          variant="destructive"
+          disabled={disabled}
+        >
+          Delete plan…
+        </Button>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle className="break-all">
+            Delete “{planName}”?
+          </AlertDialogTitle>
+          <AlertDialogDescription>
+            This permanently deletes this plan and all its accounts,
+            transactions, categories, and history. This cannot be undone.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        {error && <FieldError>{error}</FieldError>}
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={busy}>Cancel</AlertDialogCancel>
+          <Button
+            variant="destructive"
+            disabled={busy}
+            onClick={() => void confirm()}
+          >
+            {busy ? 'Deleting…' : 'Delete plan'}
+          </Button>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   )
 }

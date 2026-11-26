@@ -19,7 +19,8 @@ process.env.DATABASE_URL = path
 const { db } = await import('#/db')
 const sql = db.$client
 const { captureAction, reverseAction } = await import('./history.server')
-const { insertPlan } = await import('#/features/plans/plans.server')
+const { insertPlan, deleteOwnedPlan } =
+  await import('#/features/plans/plans.server')
 const { insertOwnedAccount, updateOwnedAccount } =
   await import('#/features/accounts/accounts.server')
 const {
@@ -89,6 +90,58 @@ function reverse(
     direction,
   })
 }
+
+test('deleting an owned plan removes its entire budget and retry receipts, but nothing else', () => {
+  function populatedPlan() {
+    const { plan, account, category } = fixture()
+    const payeeId = createId()
+    sql
+      .prepare('INSERT INTO payees (id,plan_id,name,name_key) VALUES (?,?,?,?)')
+      .run(payeeId, plan.id, 'Market', 'market')
+    sql
+      .prepare('INSERT INTO transfers (id,plan_id) VALUES (?,?)')
+      .run(createId(), plan.id)
+    sql
+      .prepare(
+        'INSERT INTO category_assignments (category_id,month,amount) VALUES (?,?,?)',
+      )
+      .run(category.id, '2026-11', 5000)
+    sql
+      .prepare(
+        'INSERT INTO transactions (id,account_id,category_id,payee_id,date,amount) VALUES (?,?,?,?,?,?)',
+      )
+      .run(createId(), account.id, category.id, payeeId, '2026-11-20', -1000)
+    const edit = action('updateCategoryName', { id: category.id }, () =>
+      updateOwnedCategoryName({
+        id: category.id,
+        ownerId: owner,
+        name: 'Groceries',
+      }),
+    )
+    assert.ok(edit.receipt)
+    return plan.id
+  }
+  const snapshot = () =>
+    [
+      'plans',
+      'accounts',
+      'payees',
+      'transfers',
+      'category_groups',
+      'categories',
+      'category_assignments',
+      'transactions',
+      'action_receipts',
+    ].map((table) => sql.prepare(`SELECT * FROM ${table} ORDER BY rowid`).all())
+  populatedPlan()
+  const kept = snapshot()
+  const target = populatedPlan()
+  const both = snapshot()
+  assert.equal(deleteOwnedPlan(target, 'another-user'), false)
+  assert.deepEqual(snapshot(), both)
+  assert.equal(deleteOwnedPlan(target, owner), true)
+  assert.deepEqual(snapshot(), kept)
+})
 
 test('field restoration preserves unrelated edits and protects overlapping undo and redo', () => {
   const { category } = fixture()

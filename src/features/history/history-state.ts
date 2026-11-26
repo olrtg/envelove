@@ -45,6 +45,10 @@ export function stackFor(planId: string): Stack {
 }
 export const historyBusy = () => busy
 export const pendingRetry = () => retry
+export function forgetPlanHistory(planId: string) {
+  histories.delete(planId)
+  changed()
+}
 export function clearHistory() {
   epoch++
   histories.clear()

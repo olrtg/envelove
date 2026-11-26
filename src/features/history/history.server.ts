@@ -96,6 +96,18 @@ function save(id: string, journal: Journal) {
     .prepare('INSERT OR REPLACE INTO action_receipts VALUES (?, ?)')
     .run(id, encode(journal))
 }
+
+// Existing receipts keep their plan ID inside the serialized journal.
+sqlite.function(
+  'receipt_plan_id',
+  (payload: string) => decode<Journal>(payload).planId,
+)
+export function deletePlanReceipts(planId: string) {
+  sqlite
+    .prepare('DELETE FROM action_receipts WHERE receipt_plan_id(payload) = ?')
+    .run(planId)
+}
+
 function owned(planId: string, owner: string) {
   if (
     !sqlite

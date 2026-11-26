@@ -15,6 +15,7 @@ import {
   updatePlanSchema,
 } from './plan.schemas'
 import {
+  deleteOwnedPlan,
   findPlanByOwner,
   findPlansByOwner,
   insertPlan,
@@ -67,3 +68,14 @@ const updatePlanSettingsRequest = createServerFn({ method: 'POST' })
   })
 
 export const updatePlanSettings = savedAction(updatePlanSettingsRequest)
+
+export const deletePlan = createServerFn({ method: 'POST' })
+  .validator(planIdSchema)
+  .handler(async ({ data }) => {
+    const user = await requireUser()
+    if (!deleteOwnedPlan(data.id, user.id)) {
+      setResponseStatus(404)
+      throw new Error('Plan not found')
+    }
+    return findPlansByOwner(user.id)
+  })

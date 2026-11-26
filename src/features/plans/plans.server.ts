@@ -1,4 +1,4 @@
-import { and, asc, eq, getTableColumns, min, sql } from 'drizzle-orm'
+import { and, asc, eq, getTableColumns, inArray, min, sql } from 'drizzle-orm'
 
 import { db } from '#/db'
 import {
@@ -9,11 +9,35 @@ import {
   plans,
   transactions,
 } from '#/db/schema'
+import { deletePlanReceipts } from '#/features/history/history.server'
 import { planCurrency } from '#/lib/country-profiles'
 import type { PlanMonth } from './plan-month'
 import type { CountryCode, CurrencyCode } from '#/lib/country-profiles'
 
 export type Plan = typeof plans.$inferSelect
+
+export function deleteOwnedPlan(id: string, ownerId: string) {
+  return db.transaction(
+    (tx) => {
+      const owned = and(eq(plans.id, id), eq(plans.ownerId, ownerId))
+      if (!tx.select({ id: plans.id }).from(plans).where(owned).get())
+        return false
+
+      // Category and Payee references restrict deletion while transactions exist.
+      const planAccounts = tx
+        .select({ id: accounts.id })
+        .from(accounts)
+        .where(eq(accounts.planId, id))
+      tx.delete(transactions)
+        .where(inArray(transactions.accountId, planAccounts))
+        .run()
+      deletePlanReceipts(id)
+      tx.delete(plans).where(owned).run()
+      return true
+    },
+    { behavior: 'immediate' },
+  )
+}
 
 export function findPlansByOwner(ownerId: string) {
   return db
