@@ -81,6 +81,14 @@ Sign in and compare a known account, transaction, and balance with the backup da
 3. Run `docker compose build --pull` then `docker compose up -d --wait`. The replacement container mounts the same `data/` and runs pending migrations. A migration failure prevents the server from starting.
 4. Check `docker compose ps`, sign in, and open a known budget. To roll back, return to the previous revision **and restore its matching pre-upgrade backup**. Do not run an older app against a newer schema. Changes made since the backup will not be present in the restored copy.
 
+## Optional: Budget chat with OpenRouter
+
+Open the menu showing your email, choose **Account settings → AI connections**, and authorize your own OpenRouter account. You can also start from **Connect OpenRouter** in Budget chat and return to that Plan after authorization. No shared API key, OAuth app registration, or local helper is needed. Each person's connection works across their own Plans; usage is billed to their OpenRouter account, not a ChatGPT subscription. Use a key spending limit on OpenRouter. Auto-sign-in development previews do not accept real connections.
+
+Use HTTPS (including Tailscale Serve) or localhost and set `BETTER_AUTH_URL` to the exact browser origin. The browser must reach `/api/openrouter/callback` on that origin after authorization; no public inbound endpoint is needed. The server needs outbound HTTPS to `openrouter.ai` and a stable random `BETTER_AUTH_SECRET` of at least 32 characters. Connection keys are encrypted using that secret. Trust the server operator, protect backups containing both the database and secret, and reconnect after secret rotation. **Disconnect** deletes Envelove's copy; revoke the key in [OpenRouter settings](https://openrouter.ai/settings/keys) to invalidate it there, including copies in old backups.
+
+Only sending a question shares data: recent conversation, dates, currency, and category spending totals for this month and the previous month go to OpenRouter and its selected provider for `openai/gpt-4.1-mini`. Chat uses Reflect's read-only spending calculations; it cannot change a Plan or read transaction memos. Conversations stay in the open page, not in Envelove's database. Don't include credentials or personal details in questions.
+
 ## Local development only
 
 Use Node 24 and the pnpm version in `package.json`. Copy `.env.example` to `.env.local`, fill in the secret and allowlist, and use `DATABASE_URL=./local.db`. Run `pnpm install --frozen-lockfile`, `pnpm db:migrate`, then `pnpm dev`. To skip mail in development, set `SEED_EMAIL` to an allowed address; authenticated pages use the development sign-in endpoint, which returns 404 in production. Never expose the development server. In an Amp orb, `.agents/setup` prepares a separate seeded `orb.db`; `amp orb services ensure` starts the development preview.

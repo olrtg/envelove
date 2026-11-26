@@ -10,12 +10,18 @@ import {
   LayoutDashboard,
   LoaderCircle,
   LogOut,
+  MessageCircle,
   PlusCircle,
   ReceiptText,
   Settings,
   WalletCards,
 } from 'lucide-react'
-import { Link, useNavigate, useRouter } from '@tanstack/react-router'
+import {
+  Link,
+  useLocation,
+  useNavigate,
+  useRouter,
+} from '@tanstack/react-router'
 import { useServerFn } from '@tanstack/react-start'
 
 import { Button } from '#/components/ui/button'
@@ -102,6 +108,7 @@ export function AppSidebar({
   activeAllAccounts = false,
   activePayees = false,
   activeReflect = false,
+  activeChat = false,
   activePlanId,
   user,
 }: {
@@ -109,6 +116,7 @@ export function AppSidebar({
   activeAllAccounts?: boolean
   activePayees?: boolean
   activeReflect?: boolean
+  activeChat?: boolean
   activePlanId?: string
   user: AccountUser
 }) {
@@ -139,7 +147,11 @@ export function AppSidebar({
   const [createPlanError, setCreatePlanError] = useState<string | null>(null)
   const [settingsError, setSettingsError] = useState<string | null>(null)
 
-  const activePlan = plans.find((plan) => plan.id === activePlanId) ?? null
+  const path = useLocation({ select: (location) => location.pathname })
+  const activePlan =
+    plans.find((plan) => plan.id === activePlanId) ??
+    (path === '/settings' ? plans[0] : null) ??
+    null
 
   useEffect(() => {
     let ignore = false
@@ -174,14 +186,14 @@ export function AppSidebar({
 
   useEffect(() => {
     const firstPlan = plans.at(0)
-    if (isLoadingPlans || activePlanId || !firstPlan) return
+    if (isLoadingPlans || path !== '/' || !firstPlan) return
 
     void navigate({
       to: '/plans/$planId',
       params: { planId: firstPlan.id },
       replace: true,
     })
-  }, [activePlanId, isLoadingPlans, navigate, plans])
+  }, [path, isLoadingPlans, navigate, plans])
 
   function openSettings() {
     if (!activePlan) return
@@ -316,10 +328,11 @@ export function AppSidebar({
                     asChild={Boolean(activePlan)}
                     disabled={!activePlan}
                     isActive={
-                      Boolean(activePlan) &&
+                      Boolean(activePlanId) &&
                       !activeAccountId &&
                       !activeAllAccounts &&
                       !activeReflect &&
+                      !activeChat &&
                       !activePayees
                     }
                   >
@@ -357,6 +370,29 @@ export function AppSidebar({
                       <>
                         <ReceiptText />
                         <span>Reflect</span>
+                      </>
+                    )}
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    asChild={Boolean(activePlan)}
+                    disabled={!activePlan}
+                    isActive={activeChat}
+                  >
+                    {activePlan ? (
+                      <Link
+                        params={{ planId: activePlan.id }}
+                        to="/plans/$planId/chat"
+                        search={{ connection: undefined }}
+                      >
+                        <MessageCircle />
+                        <span>Budget chat</span>
+                      </Link>
+                    ) : (
+                      <>
+                        <MessageCircle />
+                        <span>Budget chat</span>
                       </>
                     )}
                   </SidebarMenuButton>
@@ -567,6 +603,12 @@ function PlanSwitcher({
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
+              <DropdownMenuItem asChild className="gap-2 py-2">
+                <Link to="/settings">
+                  <Settings />
+                  Account settings
+                </Link>
+              </DropdownMenuItem>
               <DropdownMenuItem
                 disabled={isSigningOut}
                 onSelect={() => {

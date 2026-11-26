@@ -18,6 +18,17 @@ import { user } from './auth-schema'
 
 export * from './auth-schema'
 
+export const openRouterConnections = sqliteTable('openrouter_connections', {
+  ownerId: text('owner_id')
+    .primaryKey()
+    .references(() => user.id, { onDelete: 'cascade' }),
+  encryptedKey: text('encrypted_key'),
+  state: text('state'),
+  verifier: text('verifier'),
+  returnPlan: text('return_plan'),
+  expiresAt: integer('expires_at'),
+})
+
 export const plans = sqliteTable(
   'plans',
   {

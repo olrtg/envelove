@@ -12,10 +12,13 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
+import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedPlansPlanIdRouteImport } from './routes/_authenticated/plans/$planId'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiDevSignInRouteImport } from './routes/api/dev/sign-in'
+import { Route as ApiOpenrouterCallbackRouteImport } from './routes/api/openrouter/callback'
 import { Route as AuthenticatedPlansPlanIdIndexRouteImport } from './routes/_authenticated/plans/$planId/index'
+import { Route as AuthenticatedPlansPlanIdChatRouteImport } from './routes/_authenticated/plans/$planId/chat'
 import { Route as AuthenticatedPlansPlanIdPayeesRouteImport } from './routes/_authenticated/plans/$planId/payees'
 import { Route as AuthenticatedPlansPlanIdReflectRouteImport } from './routes/_authenticated/plans/$planId/reflect'
 import { Route as AuthenticatedPlansPlanIdAccountsIndexRouteImport } from './routes/_authenticated/plans/$planId/accounts/index'
@@ -35,6 +38,11 @@ const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedPlansPlanIdRoute =
   AuthenticatedPlansPlanIdRouteImport.update({
     id: '/plans/$planId',
@@ -51,10 +59,21 @@ const ApiDevSignInRoute = ApiDevSignInRouteImport.update({
   path: '/api/dev/sign-in',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiOpenrouterCallbackRoute = ApiOpenrouterCallbackRouteImport.update({
+  id: '/api/openrouter/callback',
+  path: '/api/openrouter/callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedPlansPlanIdIndexRoute =
   AuthenticatedPlansPlanIdIndexRouteImport.update({
     id: '/',
     path: '/',
+    getParentRoute: () => AuthenticatedPlansPlanIdRoute,
+  } as any)
+const AuthenticatedPlansPlanIdChatRoute =
+  AuthenticatedPlansPlanIdChatRouteImport.update({
+    id: '/chat',
+    path: '/chat',
     getParentRoute: () => AuthenticatedPlansPlanIdRoute,
   } as any)
 const AuthenticatedPlansPlanIdPayeesRoute =
@@ -85,9 +104,12 @@ const AuthenticatedPlansPlanIdAccountsAccountIdRoute =
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
   '/login': typeof LoginRoute
+  '/settings': typeof AuthenticatedSettingsRoute
   '/plans/$planId': typeof AuthenticatedPlansPlanIdRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/dev/sign-in': typeof ApiDevSignInRoute
+  '/api/openrouter/callback': typeof ApiOpenrouterCallbackRoute
+  '/plans/$planId/chat': typeof AuthenticatedPlansPlanIdChatRoute
   '/plans/$planId/payees': typeof AuthenticatedPlansPlanIdPayeesRoute
   '/plans/$planId/reflect': typeof AuthenticatedPlansPlanIdReflectRoute
   '/plans/$planId/': typeof AuthenticatedPlansPlanIdIndexRoute
@@ -96,9 +118,12 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
+  '/settings': typeof AuthenticatedSettingsRoute
   '/': typeof AuthenticatedIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/dev/sign-in': typeof ApiDevSignInRoute
+  '/api/openrouter/callback': typeof ApiOpenrouterCallbackRoute
+  '/plans/$planId/chat': typeof AuthenticatedPlansPlanIdChatRoute
   '/plans/$planId/payees': typeof AuthenticatedPlansPlanIdPayeesRoute
   '/plans/$planId/reflect': typeof AuthenticatedPlansPlanIdReflectRoute
   '/plans/$planId': typeof AuthenticatedPlansPlanIdIndexRoute
@@ -109,10 +134,13 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/login': typeof LoginRoute
+  '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/plans/$planId': typeof AuthenticatedPlansPlanIdRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/dev/sign-in': typeof ApiDevSignInRoute
+  '/api/openrouter/callback': typeof ApiOpenrouterCallbackRoute
+  '/_authenticated/plans/$planId/chat': typeof AuthenticatedPlansPlanIdChatRoute
   '/_authenticated/plans/$planId/payees': typeof AuthenticatedPlansPlanIdPayeesRoute
   '/_authenticated/plans/$planId/reflect': typeof AuthenticatedPlansPlanIdReflectRoute
   '/_authenticated/plans/$planId/': typeof AuthenticatedPlansPlanIdIndexRoute
@@ -124,9 +152,12 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/login'
+    | '/settings'
     | '/plans/$planId'
     | '/api/auth/$'
     | '/api/dev/sign-in'
+    | '/api/openrouter/callback'
+    | '/plans/$planId/chat'
     | '/plans/$planId/payees'
     | '/plans/$planId/reflect'
     | '/plans/$planId/'
@@ -135,9 +166,12 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
+    | '/settings'
     | '/'
     | '/api/auth/$'
     | '/api/dev/sign-in'
+    | '/api/openrouter/callback'
+    | '/plans/$planId/chat'
     | '/plans/$planId/payees'
     | '/plans/$planId/reflect'
     | '/plans/$planId'
@@ -147,10 +181,13 @@ export interface FileRouteTypes {
     | '__root__'
     | '/_authenticated'
     | '/login'
+    | '/_authenticated/settings'
     | '/_authenticated/'
     | '/_authenticated/plans/$planId'
     | '/api/auth/$'
     | '/api/dev/sign-in'
+    | '/api/openrouter/callback'
+    | '/_authenticated/plans/$planId/chat'
     | '/_authenticated/plans/$planId/payees'
     | '/_authenticated/plans/$planId/reflect'
     | '/_authenticated/plans/$planId/'
@@ -163,6 +200,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiDevSignInRoute: typeof ApiDevSignInRoute
+  ApiOpenrouterCallbackRoute: typeof ApiOpenrouterCallbackRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -188,6 +226,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedIndexRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/settings': {
+      id: '/_authenticated/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AuthenticatedSettingsRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/plans/$planId': {
       id: '/_authenticated/plans/$planId'
       path: '/plans/$planId'
@@ -209,11 +254,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiDevSignInRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/openrouter/callback': {
+      id: '/api/openrouter/callback'
+      path: '/api/openrouter/callback'
+      fullPath: '/api/openrouter/callback'
+      preLoaderRoute: typeof ApiOpenrouterCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/plans/$planId/': {
       id: '/_authenticated/plans/$planId/'
       path: '/'
       fullPath: '/plans/$planId/'
       preLoaderRoute: typeof AuthenticatedPlansPlanIdIndexRouteImport
+      parentRoute: typeof AuthenticatedPlansPlanIdRoute
+    }
+    '/_authenticated/plans/$planId/chat': {
+      id: '/_authenticated/plans/$planId/chat'
+      path: '/chat'
+      fullPath: '/plans/$planId/chat'
+      preLoaderRoute: typeof AuthenticatedPlansPlanIdChatRouteImport
       parentRoute: typeof AuthenticatedPlansPlanIdRoute
     }
     '/_authenticated/plans/$planId/payees': {
@@ -248,6 +307,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedPlansPlanIdRouteChildren {
+  AuthenticatedPlansPlanIdChatRoute: typeof AuthenticatedPlansPlanIdChatRoute
   AuthenticatedPlansPlanIdPayeesRoute: typeof AuthenticatedPlansPlanIdPayeesRoute
   AuthenticatedPlansPlanIdReflectRoute: typeof AuthenticatedPlansPlanIdReflectRoute
   AuthenticatedPlansPlanIdIndexRoute: typeof AuthenticatedPlansPlanIdIndexRoute
@@ -257,6 +317,7 @@ interface AuthenticatedPlansPlanIdRouteChildren {
 
 const AuthenticatedPlansPlanIdRouteChildren: AuthenticatedPlansPlanIdRouteChildren =
   {
+    AuthenticatedPlansPlanIdChatRoute: AuthenticatedPlansPlanIdChatRoute,
     AuthenticatedPlansPlanIdPayeesRoute: AuthenticatedPlansPlanIdPayeesRoute,
     AuthenticatedPlansPlanIdReflectRoute: AuthenticatedPlansPlanIdReflectRoute,
     AuthenticatedPlansPlanIdIndexRoute: AuthenticatedPlansPlanIdIndexRoute,
@@ -272,11 +333,13 @@ const AuthenticatedPlansPlanIdRouteWithChildren =
   )
 
 interface AuthenticatedRouteChildren {
+  AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
   AuthenticatedPlansPlanIdRoute: typeof AuthenticatedPlansPlanIdRouteWithChildren
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
   AuthenticatedPlansPlanIdRoute: AuthenticatedPlansPlanIdRouteWithChildren,
 }
@@ -290,6 +353,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiDevSignInRoute: ApiDevSignInRoute,
+  ApiOpenrouterCallbackRoute: ApiOpenrouterCallbackRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

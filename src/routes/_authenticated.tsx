@@ -48,6 +48,9 @@ function AuthenticatedLayout() {
       activeReflect={matches.some(
         (match) => match.routeId === '/_authenticated/plans/$planId/reflect',
       )}
+      activeChat={matches.some(
+        (match) => match.routeId === '/_authenticated/plans/$planId/chat',
+      )}
       activePlanId={planMatch ? planMatch.params.planId : undefined}
       user={user}
     >

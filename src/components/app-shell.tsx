@@ -17,6 +17,7 @@ export function AppShell({
   activeAllAccounts,
   activePayees,
   activeReflect,
+  activeChat,
   activePlanId,
   children,
   user,
@@ -25,6 +26,7 @@ export function AppShell({
   activeAllAccounts?: boolean
   activePayees?: boolean
   activeReflect?: boolean
+  activeChat?: boolean
   activePlanId?: string
   children: React.ReactNode
   user: { email: string }
@@ -43,6 +45,7 @@ export function AppShell({
           activeAllAccounts={activeAllAccounts}
           activePayees={activePayees}
           activeReflect={activeReflect}
+          activeChat={activeChat}
           activePlanId={activePlanId}
           user={user}
         />
