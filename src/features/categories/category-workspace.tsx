@@ -429,7 +429,7 @@ export function CategoryWorkspace({
         />
       </header>
 
-      <div className="flex min-w-0 flex-1 items-start">
+      <div className="flex min-w-0 flex-1">
         <div className="flex min-w-0 flex-1 flex-col p-2 md:p-6">
           <div className="mb-2 flex items-center">
             <Button
