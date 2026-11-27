@@ -189,6 +189,9 @@ export function BudgetChat({
               {connected ? <ArrowUp /> : 'Connect OpenRouter'}
             </Button>
           </div>
+          <p className="text-xs text-muted-foreground">
+            Uses GPT-4.1 mini. Model and reasoning effort can’t be changed here.
+          </p>
           <p
             role="status"
             className="flex items-start gap-2 text-xs text-muted-foreground"
