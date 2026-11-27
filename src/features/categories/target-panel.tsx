@@ -5,6 +5,14 @@ import type { ReactNode } from 'react'
 import { useServerFn } from '@tanstack/react-start'
 import { Button } from '#/components/ui/button'
 import { Input } from '#/components/ui/input'
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '#/components/ui/select'
 import { Field, FieldLabel, FieldGroup } from '#/components/ui/field'
 import {
   Sheet,
@@ -265,14 +273,14 @@ function Choice({
   return (
     <Field>
       <FieldLabel htmlFor={id}>{label}</FieldLabel>
-      <select
-        id={id}
-        className="h-9 w-full rounded-md border bg-background px-2"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-      >
-        {children}
-      </select>
+      <Select value={String(value)} onValueChange={onChange}>
+        <SelectTrigger id={id} className="w-full">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectGroup>{children}</SelectGroup>
+        </SelectContent>
+      </Select>
     </Field>
   )
 }
@@ -363,7 +371,9 @@ function TargetEditor({
           }}
         >
           {frequencies.map((f) => (
-            <option key={f}>{f}</option>
+            <SelectItem key={f} value={f}>
+              {f}
+            </SelectItem>
           ))}
         </Choice>
         <Field>
@@ -383,26 +393,28 @@ function TargetEditor({
           value={behavior}
           onChange={(v) => setBehavior(v as CategoryTarget['behavior'])}
         >
-          <option>Set aside</option>
-          <option>Fill up to</option>
-          {frequency === 'Custom' && <option>Have a balance of</option>}
+          <SelectItem value="Set aside">Set aside</SelectItem>
+          <SelectItem value="Fill up to">Fill up to</SelectItem>
+          {frequency === 'Custom' && (
+            <SelectItem value="Have a balance of">Have a balance of</SelectItem>
+          )}
         </Choice>
         {frequency === 'Weekly' && (
           <Choice label="Every" value={day} onChange={(v) => setDay(Number(v))}>
             {weekdays.map((d, i) => (
-              <option key={d} value={i}>
+              <SelectItem key={d} value={String(i)}>
                 {d}
-              </option>
+              </SelectItem>
             ))}
           </Choice>
         )}
         {frequency === 'Monthly' && (
           <Choice label="By" value={day} onChange={(v) => setDay(Number(v))}>
-            <option value={0}>Last day of month</option>
+            <SelectItem value="0">Last day of month</SelectItem>
             {Array.from({ length: 31 }, (_, i) => (
-              <option value={i + 1} key={i}>
+              <SelectItem value={String(i + 1)} key={i}>
                 Day {i + 1}
-              </option>
+              </SelectItem>
             ))}
           </Choice>
         )}
@@ -447,7 +459,9 @@ function TargetEditor({
                   onChange={(v) => setInterval(Number(v))}
                 >
                   {Array.from({ length: 11 }, (_, i) => (
-                    <option key={i}>{i + 1}</option>
+                    <SelectItem key={i} value={String(i + 1)}>
+                      {i + 1}
+                    </SelectItem>
                   ))}
                 </Choice>
                 <Choice
@@ -455,8 +469,8 @@ function TargetEditor({
                   value={unit}
                   onChange={(v) => setUnit(Number(v))}
                 >
-                  <option value={1}>Months</option>
-                  <option value={12}>Years</option>
+                  <SelectItem value="1">Months</SelectItem>
+                  <SelectItem value="12">Years</SelectItem>
                 </Choice>
               </div>
             )}

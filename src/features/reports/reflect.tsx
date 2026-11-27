@@ -2,7 +2,15 @@ import { useState } from 'react'
 import { QueryClient, useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { ChevronDown, ChevronRight } from 'lucide-react'
-import { Button } from '#/components/ui/button'
+import { Button, buttonVariants } from '#/components/ui/button'
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '#/components/ui/select'
 import {
   Dialog,
   DialogContent,
@@ -190,27 +198,33 @@ export function Reflect({
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <select
-            aria-label="Date range"
-            className="rounded-md border bg-background px-3 py-1.5 text-sm"
-            value={preset}
-            onChange={(e) => setPreset(e.target.value)}
-          >
-            {[
-              ['1', 'This month'],
-              ['3', 'Last 3 months'],
-              ['6', 'Last 6 months'],
-              ['12', 'Last 12 months'],
-              ['ytd', 'Year to date'],
-              ['lastYear', 'Last year'],
-              ['all', 'All dates'],
-              ['custom', 'Custom dates'],
-            ].map(([v, l]) => (
-              <option key={v} value={v}>
-                {l}
-              </option>
-            ))}
-          </select>
+          <Select value={preset} onValueChange={setPreset}>
+            <SelectTrigger
+              aria-label="Date range"
+              size="sm"
+              className={buttonVariants({ variant: 'outline', size: 'sm' })}
+            >
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent position="popper" align="start">
+              <SelectGroup>
+                {[
+                  ['1', 'This month'],
+                  ['3', 'Last 3 months'],
+                  ['6', 'Last 6 months'],
+                  ['12', 'Last 12 months'],
+                  ['ytd', 'Year to date'],
+                  ['lastYear', 'Last year'],
+                  ['all', 'All dates'],
+                  ['custom', 'Custom dates'],
+                ].map(([v, l]) => (
+                  <SelectItem key={v} value={v}>
+                    {l}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
           {preset === 'custom' && (
             <>
               {[
@@ -289,15 +303,20 @@ export function Reflect({
                 <h3 className="font-heading text-lg font-semibold">
                   Spending by {byGroup ? 'group' : 'category'}
                 </h3>
-                <select
-                  aria-label="Group spending by"
-                  className="rounded-md border bg-background px-2 py-1 text-sm"
+                <Select
                   value={byGroup ? 'groups' : 'categories'}
-                  onChange={(e) => setByGroup(e.target.value === 'groups')}
+                  onValueChange={(value) => setByGroup(value === 'groups')}
                 >
-                  <option value="categories">Categories</option>
-                  <option value="groups">Groups</option>
-                </select>
+                  <SelectTrigger aria-label="Group spending by" size="sm">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent position="popper" align="end">
+                    <SelectGroup>
+                      <SelectItem value="categories">Categories</SelectItem>
+                      <SelectItem value="groups">Groups</SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
               </div>
               {!buckets.length && (
                 <p className="py-6 text-sm text-muted-foreground">

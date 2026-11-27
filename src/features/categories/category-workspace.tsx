@@ -50,6 +50,14 @@ import {
 } from '#/components/ui/empty'
 import { Field, FieldError, FieldLabel } from '#/components/ui/field'
 import { Input } from '#/components/ui/input'
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '#/components/ui/select'
 import { Spinner } from '#/components/ui/spinner'
 import { budgetCategoryMonth } from '#/features/budget/budget-engine'
 import type { ReadyToAssign } from '#/features/budget/budget-engine'
@@ -451,16 +459,24 @@ export function CategoryWorkspace({
             <div className="md:min-w-[39rem]">
               <div className="flex items-center border-b bg-muted/30 py-2 pl-4 pr-3 text-xs font-medium uppercase tracking-wide text-muted-foreground md:pl-12">
                 <span className="flex-1">Category</span>
-                <select
-                  aria-label="Plan amount column"
-                  className="rounded-md border bg-background px-2 py-1.5 text-sm text-foreground md:hidden"
-                  value={phoneColumn}
-                  onChange={(event) => setPhoneColumn(event.target.value)}
-                >
-                  {['Available', 'Assigned', 'Activity'].map((column) => (
-                    <option key={column}>{column}</option>
-                  ))}
-                </select>
+                <Select value={phoneColumn} onValueChange={setPhoneColumn}>
+                  <SelectTrigger
+                    aria-label="Plan amount column"
+                    size="sm"
+                    className="text-foreground md:hidden"
+                  >
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent position="popper" align="end">
+                    <SelectGroup>
+                      {['Available', 'Assigned', 'Activity'].map((column) => (
+                        <SelectItem key={column} value={column}>
+                          {column}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
                 {['Assigned', 'Activity', 'Available'].map((column) => (
                   <span
                     key={column}
