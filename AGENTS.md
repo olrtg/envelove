@@ -7,6 +7,8 @@ A budgeting app heavily inspired by YNAB (You Need A Budget). When working on fe
 
 These are a reference, not a spec — we may intentionally diverge from how YNAB works.
 
+Prefer composing shadcn/ui components over building custom UI when they support the required behavior.
+
 <!-- intent-skills:start -->
 
 # TanStack Intent - before editing files, run the matching guidance command.

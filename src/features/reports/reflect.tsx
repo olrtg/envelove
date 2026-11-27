@@ -351,19 +351,6 @@ export function Reflect({
             <p className="my-1 font-heading text-3xl font-semibold">
               {money(balances.at(-1)?.net ?? 0)}
             </p>
-            <div className="my-4 flex gap-4 text-xs">
-              {['Assets', 'Debts', 'Net worth'].map((s, i) => (
-                <span key={s} className="flex items-center gap-1.5">
-                  <i
-                    className="size-2 rounded-full"
-                    style={{
-                      background: i < 2 ? seriesColor(i) : 'currentColor',
-                    }}
-                  />
-                  {s}
-                </span>
-              ))}
-            </div>
             <BalanceChart points={balances} format={money} />
             <div className="flex justify-between text-xs text-muted-foreground">
               <span>{formatPlanMonth(from)}</span>
